@@ -17,15 +17,24 @@ pntr_image* profilePicture;
 // enable debug by pressing D
 static bool debugMode = false;
 
-void HandleClayErrors(Clay_ErrorData errorData) {
-    pntr_app_log(PNTR_APP_LOG_ERROR, errorData.errorText.chars);
-}
 
-bool Init(pntr_app* app) {
-    pntr_clay_initialize(app->screen, HandleClayErrors);
-    fonts[0] = pntr_load_font_default();
-    profilePicture = pntr_load_image("assets/logo.png");
-    return true;
+// Re-useable components are just normal functions
+void SidebarItemComponent() {
+    CLAY({
+        .layout = {
+            .sizing = {
+                .width = CLAY_SIZING_GROW(0),
+                .height = CLAY_SIZING_FIXED(50)
+            },
+            .padding = CLAY_PADDING_ALL(16),
+        },
+        .backgroundColor = PNTR_CLAY_COLOR(PNTR_ORANGE)
+    }) {
+        CLAY_TEXT(CLAY_STRING("ITEM"), CLAY_TEXT_CONFIG({
+            .fontSize = 20,
+            .textColor = PNTR_CLAY_COLOR(PNTR_WHITE)
+        }));
+    }
 }
 
 // Here I implement my UI as a stand-alone function
@@ -33,7 +42,18 @@ Clay_RenderCommandArray DrawUI() {
     Clay_BeginLayout();
     
     // An example of laying out a UI with a fixed width sidebar and flexible width main content
-    CLAY({ .id = CLAY_ID("OuterContainer"), .layout = { .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}, .padding = CLAY_PADDING_ALL(16), .childGap = 16 }, .backgroundColor = PNTR_CLAY_COLOR(PNTR_BLACK) }) {
+    CLAY({
+        .id = CLAY_ID("OuterContainer"),
+        .layout = {
+            .sizing = {
+                CLAY_SIZING_GROW(0),
+                CLAY_SIZING_GROW(0)
+            },
+            .padding = CLAY_PADDING_ALL(16),
+            .childGap = 16
+        },
+        .backgroundColor = PNTR_CLAY_COLOR(PNTR_BLACK)
+    }) {
         CLAY({
             .id = CLAY_ID("SideBar"),
             .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM, .sizing = {
@@ -78,14 +98,34 @@ Clay_RenderCommandArray DrawUI() {
 
             // Standard C code like loops etc work inside components
             for (int i = 0; i < 5; i++) {
-                // SidebarItemComponent();
+                SidebarItemComponent();
             }
-
-            CLAY({ .id = CLAY_ID("MainContent"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } }, .backgroundColor = PNTR_CLAY_COLOR(PNTR_BLACK) }) {}
         }
+
+        CLAY({
+            .id = CLAY_ID("MainContent"),
+            .layout = { 
+                .sizing = {
+                    .width = CLAY_SIZING_GROW(0), 
+                    .height = CLAY_SIZING_GROW(0)
+                }
+            },
+            .backgroundColor = PNTR_CLAY_COLOR(PNTR_SKYBLUE)
+        }) {}
     }
     
     return Clay_EndLayout();
+}
+
+void HandleClayErrors(Clay_ErrorData errorData) {
+    pntr_app_log(PNTR_APP_LOG_ERROR, errorData.errorText.chars);
+}
+
+bool Init(pntr_app* app) {
+    pntr_clay_initialize(app->screen, HandleClayErrors);
+    fonts[0] = pntr_load_font_default();
+    profilePicture = pntr_load_image("assets/logo.png");
+    return true;
 }
 
 bool Update(pntr_app* app, pntr_image* screen){
