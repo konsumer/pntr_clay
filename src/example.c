@@ -11,6 +11,12 @@
 // array of fonts you want to use
 static pntr_font* fonts[1] = {};
 
+// demo image
+pntr_image* profilePicture;
+
+// enable debug by pressing D
+static bool debugMode = false;
+
 void HandleClayErrors(Clay_ErrorData errorData) {
     pntr_app_log(PNTR_APP_LOG_ERROR, errorData.errorText.chars);
 }
@@ -18,7 +24,7 @@ void HandleClayErrors(Clay_ErrorData errorData) {
 bool Init(pntr_app* app) {
     pntr_clay_initialize(app->screen, HandleClayErrors);
     fonts[0] = pntr_load_font_default();
-
+    profilePicture = pntr_load_image("assets/logo.png");
     return true;
 }
 
@@ -26,103 +32,63 @@ bool Init(pntr_app* app) {
 Clay_RenderCommandArray DrawUI() {
     Clay_BeginLayout();
     
-    // Main container with padding and background
-    CLAY({
-        .id = CLAY_ID("MainContainer"),
-        .layout = {
-            .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) },
-            .padding = CLAY_PADDING_ALL(16)
-        },
-        .backgroundColor = { 250, 250, 255, 255 }
-    }) {
-        // Header bar
+    // An example of laying out a UI with a fixed width sidebar and flexible width main content
+    CLAY({ .id = CLAY_ID("OuterContainer"), .layout = { .sizing = {CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0)}, .padding = CLAY_PADDING_ALL(16), .childGap = 16 }, .backgroundColor = PNTR_CLAY_COLOR(PNTR_BLACK) }) {
         CLAY({
-            .id = CLAY_ID("Header"),
-            .layout = {
-                .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(60) },
-                .padding = CLAY_PADDING_ALL(12),
-                .childAlignment = { .y = CLAY_ALIGN_Y_CENTER }
+            .id = CLAY_ID("SideBar"),
+            .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM, .sizing = {
+                .width = CLAY_SIZING_FIXED(300),
+                .height = CLAY_SIZING_GROW(0) },
+                .padding = CLAY_PADDING_ALL(16),
+                .childGap = 16
             },
-            .backgroundColor = { 100, 150, 200, 255 },
-            .cornerRadius = CLAY_CORNER_RADIUS(8)
+            .backgroundColor = PNTR_CLAY_COLOR(PNTR_RAYWHITE)
         }) {
-            CLAY_TEXT(CLAY_STRING("Header Title"), CLAY_TEXT_CONFIG({
-                .fontSize = 24,
-                .textColor = { 255, 255, 255, 255 }
-            }));
-        }
-        
-        // Content area with sidebar and main panel
-        CLAY({
-            .id = CLAY_ID("ContentArea"),
-            .layout = {
-                .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) },
-                .childGap = 16,
-                .layoutDirection = CLAY_LEFT_TO_RIGHT
-            }
-        }) {
-            // Sidebar
             CLAY({
-                .id = CLAY_ID("Sidebar"),
+                .id = CLAY_ID("ProfilePictureOuter"),
                 .layout = {
-                    .sizing = { CLAY_SIZING_FIXED(200), CLAY_SIZING_GROW(0) },
+                    .sizing = {
+                        .width = CLAY_SIZING_GROW(0)
+                    },
                     .padding = CLAY_PADDING_ALL(16),
-                    .layoutDirection = CLAY_TOP_TO_BOTTOM,
-                    .childGap = 8
-                },
-                .backgroundColor = { 220, 220, 220, 255 },
-                .cornerRadius = CLAY_CORNER_RADIUS(6)
-            }) {
-                CLAY_TEXT(CLAY_STRING("Sidebar"), CLAY_TEXT_CONFIG({
-                    .fontSize = 18,
-                    .textColor = { 50, 50, 50, 255 }
-                }));
-                
-                // Sidebar items
-                for (int i = 0; i < 3; i++) {
-                    CLAY({
-                        .layout = {
-                            .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_FIXED(40) },
-                            .padding = CLAY_PADDING_ALL(8)
-                        },
-                        .backgroundColor = { 180, 180, 180, 255 },
-                        .cornerRadius = CLAY_CORNER_RADIUS(4)
-                    }) {
-                        CLAY_TEXT(CLAY_STRING("Item"), CLAY_TEXT_CONFIG({
-                            .fontSize = 14,
-                            .textColor = { 50, 50, 50, 255 }
-                        }));
+                    .childGap = 16,
+                    .childAlignment = {
+                        .y = CLAY_ALIGN_Y_CENTER
                     }
-                }
-            }
-            
-            // Main content panel
-            CLAY({
-                .id = CLAY_ID("MainContent"),
-                .layout = {
-                    .sizing = { CLAY_SIZING_GROW(0), CLAY_SIZING_GROW(0) },
-                    .padding = CLAY_PADDING_ALL(24)
                 },
-                .backgroundColor = { 240, 240, 240, 255 },
-                .cornerRadius = CLAY_CORNER_RADIUS(6)
+                .backgroundColor = PNTR_CLAY_COLOR(PNTR_RED)
             }) {
-                CLAY_TEXT(CLAY_STRING("Main Content Area"), CLAY_TEXT_CONFIG({
-                    .fontSize = 20,
-                    .textColor = { 50, 50, 50, 255 }
+                CLAY({
+                    .id = CLAY_ID("ProfilePicture"),
+                    .layout = {
+                        .sizing = {
+                            .width = CLAY_SIZING_FIXED(60),
+                            .height = CLAY_SIZING_FIXED(60)
+                        }
+                    },
+                    .image = {
+                        .imageData = profilePicture
+                    }
+                }) {}
+                CLAY_TEXT(CLAY_STRING("Clay - UI Library"), CLAY_TEXT_CONFIG({
+                    .fontSize = 24,
+                    .textColor = PNTR_CLAY_COLOR(PNTR_WHITE)
                 }));
             }
+
+            // Standard C code like loops etc work inside components
+            for (int i = 0; i < 5; i++) {
+                // SidebarItemComponent();
+            }
+
+            CLAY({ .id = CLAY_ID("MainContent"), .layout = { .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) } }, .backgroundColor = PNTR_CLAY_COLOR(PNTR_BLACK) }) {}
         }
     }
     
     return Clay_EndLayout();
 }
 
-
-
-bool Update(pntr_app* app, pntr_image* screen) {
-    // pntr_clear_background(screen, PNTR_WHITE);
-    // pntr_draw_circle_fill(screen, screen->width / 2, screen->height / 2, 100, PNTR_BLUE);
-
+bool Update(pntr_app* app, pntr_image* screen){
     pntr_clay_render(
         screen,
         DrawUI(),
@@ -136,6 +102,12 @@ bool Update(pntr_app* app, pntr_image* screen) {
         0.0f,
         0.0f
     );
+
+    // pntr_app_key_pressed is not workign right on web
+    if (pntr_app_key_pressed(app, PNTR_APP_KEY_D)) {
+        debugMode = !debugMode;
+    }
+    Clay_SetDebugModeEnabled(debugMode);
 
     return true;
 }
