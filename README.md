@@ -20,5 +20,7 @@ emcmake cmake -B wbuild -DCMAKE_BUILD_TYPE=Release
 # build for web
 cmake --build wbuild
 
+# run a web-server
+npx -y live-server docs
 ```
 
