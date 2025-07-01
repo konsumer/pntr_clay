@@ -133,13 +133,11 @@ bool Update(pntr_app* app, pntr_image* screen){
         screen,
         DrawUI(),
         fonts,
-        pntr_app_delta_time(app),
-        pntr_app_mouse_x(app), // maybe pntr_app_mouse_delta_x?
-        pntr_app_mouse_y(app),  // maybe pntr_app_mouse_delta_y?
-        pntr_app_mouse_button_down(app, PNTR_APP_MOUSE_BUTTON_FIRST),
-        
-        // not sure how to get scroll x/y
-        0.0f,
+        app->deltaTime,
+        app->mouseX,
+        app->mouseY,
+        app->mouseButtonsDown[PNTR_APP_MOUSE_BUTTON_FIRST],
+        (float)app->mouseWheel,
         0.0f
     );
 
